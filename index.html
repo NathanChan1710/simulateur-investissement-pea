@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>(NOTHING) PEA STUDIO // Simulateur DCA & Comparateur d'Épargne</title>
+  <meta name="description" content="Simulateur d'investissement PEA interactif : multi-ETF, projections de gains historiques, fiscalité 5 ans et comparateur détaillé avec Livret A, Assurance-Vie et Compte-Titres." />
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23d71920'/></svg>" />
+
+  <!-- Google Fonts: Space Grotesk (Police principale lisse et moderne), Inter, Space Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Fond en grille de points Nothing OS -->
+  <div class="dot-matrix-bg"></div>
+
+  <div class="container">
+    <!-- ====================================================================
+         HEADER : Marque Nothing OS, Navigation & Switch Mode Jour / Nuit
+         ==================================================================== -->
+    <header class="header">
+      <div class="brand">
+        <span class="glyph-record" id="brand-glyph" title="Système Actif"></span>
+        <div class="brand-title">
+          <div class="brand-title-row">
+            <span class="font-display brand-name">(NOTHING)</span>
+            <span class="brand-badge font-mono">[PEA STUDIO]</span>
+          </div>
+          <span class="brand-sub">DCA // FISCALITÉ // COMPARATEUR D'ÉPARGNE</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Switch Thème Jour / Nuit sans emoji -->
+        <button id="theme-toggle-btn" class="theme-toggle" aria-label="Changer le thème" title="Bascule Mode Jour / Nuit">
+          <span class="theme-dot"></span>
+          <span id="theme-label" class="font-mono theme-text">MODE JOUR</span>
+        </button>
+
+        <!-- Onglets Navigation Rapide -->
+        <nav class="nav-tabs font-mono">
+          <a href="#simulator-section" class="nav-link active">SIMULATEUR DCA</a>
+          <a href="#fiscalite-section" class="nav-link">RÈGLE 5 ANS</a>
+          <a href="#comparateur-section" class="nav-link">COMPARATEUR ÉPARGNE</a>
+          <a href="#guide-section" class="nav-link">GUIDE</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+         HERO BANNER : Présentation claire et pédagogique
+         ==================================================================== -->
+    <section class="intro-banner">
+      <div class="intro-content">
+        <div class="intro-tag font-mono">[STRATÉGIE PEA DCA & INTÉRÊTS COMPOSÉS]</div>
+        <h1 class="intro-heading font-display">OPTIMISEZ VOS INVESTISSEMENTS & COMPAREZ VOS ENVELOPPES D'ÉPARGNE</h1>
+        <p class="intro-p">
+          Sélectionnez <strong>jusqu'à 5 ETF ou actions éligibles au PEA</strong>, personnalisez vos versements mensuels et projetez vos gains nets. Analysez en direct la différence fiscale <strong>avant et après 5 ans</strong> et comparez vos rendements face au <strong>Livret A, à l'Assurance-Vie et au Compte-Titres</strong>.
+        </p>
+      </div>
+      <div class="intro-stats-summary font-mono">
+        <div class="intro-stat-pill">
+          <span class="pill-dot"></span>
+          <span>PLAFOND DU PEA : 150 000 € DE VERSEMENTS</span>
+        </div>
+        <div class="intro-stat-pill highlight-pill">
+          <span class="pill-dot red-dot"></span>
+          <span>APRÈS 5 ANS : 0% D'IMPÔT SUR LE REVENU</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 1 : SÉLECTEUR MULTI-ACTIFS (MAX 5) & MONTANTS MENSUELS
+         ==================================================================== -->
+    <section id="simulator-section" class="section-container">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="section-num font-mono">01 // CONFIGURATION</span>
+          <h2 class="section-title font-display">VOS ACTIFS & MONTANTS MENSUELS (MAX 5)</h2>
+        </div>
+        <div class="section-actions">
+          <span id="asset-count-badge" class="badge-count font-mono">2 / 5 ACTIFS SÉLECTIONNÉS</span>
+          <button id="open-catalog-btn" class="btn-primary font-mono">+ AJOUTER UN ACTIF</button>
+        </div>
+      </div>
+
+      <!-- Grille des cartes des actifs sélectionnés -->
+      <div id="selected-assets-list" class="assets-grid">
+        <!-- Rendu dynamique par app.js -->
+      </div>
+
+      <!-- Contrôles du DCA & Horizon de placement -->
+      <div class="dca-control-card widget">
+        <div class="dca-control-grid">
+          <!-- Total Mensuel -->
+          <div class="dca-control-item">
+            <div class="control-label-row font-mono">
+              <span>TOTAL INVESTI PAR MOIS</span>
+              <span class="control-sub">Somme cumulée</span>
+            </div>
+            <div class="dca-total-display font-display" id="total-monthly-amount">600 €<span class="month-unit font-sans">/mois</span></div>
+            <div class="dca-annual-sub font-mono" id="total-annual-amount">soit 7 200 € par an</div>
+          </div>
+
+          <!-- Horizon de placement & Curseur -->
+          <div class="dca-control-item duration-item">
+            <div class="control-label-row font-mono">
+              <span>HORIZON DE PLACEMENT : <strong id="duration-years-val" class="highlight-val">10 ANS</strong></span>
+              <span id="pea-maturity-tag" class="maturity-tag font-mono">[PEA MATURE - EXONÉRÉ D'IMPÔT IR]</span>
+            </div>
+            
+            <div class="slider-wrapper">
+              <input type="range" id="duration-slider" min="1" max="30" value="10" step="1" class="custom-range" />
+              <div class="slider-ticks font-mono">
+                <span>1 an</span>
+                <span class="tick-key">5 ans [PIVOT FISCAL]</span>
+                <span>10 ans</span>
+                <span>15 ans</span>
+                <span>20 ans</span>
+                <span>30 ans</span>
+              </div>
+            </div>
+
+            <!-- Raccourcis de durée -->
+            <div class="quick-chips font-mono">
+              <button class="chip-btn" data-years="3">3 ANS</button>
+              <button class="chip-btn key-chip" data-years="5">5 ANS (PIVOT)</button>
+              <button class="chip-btn active" data-years="10">10 ANS</button>
+              <button class="chip-btn" data-years="15">15 ANS</button>
+              <button class="chip-btn" data-years="20">20 ANS</button>
+            </div>
+          </div>
+
+          <!-- Rendement moyen pondéré -->
+          <div class="dca-control-item return-item">
+            <div class="control-label-row font-mono">
+              <span>RENDEMENT MOYEN PONDÉRÉ</span>
+              <span class="control-sub">Historique long terme</span>
+            </div>
+            <div class="cagr-display font-display" id="weighted-cagr-display">+8.48 %<span class="year-unit font-sans">/an</span></div>
+            <div class="cagr-subtext font-mono">Calculé selon la pondération de vos actifs</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2 : RÉSULTATS FISCAUX DU RETRAIT PEA (AVANT / APRÈS 5 ANS)
+         ==================================================================== -->
+    <section id="fiscalite-section" class="section-container">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="section-num font-mono">02 // SIMULATION DE RETRAIT & FISCALITÉ PEA</span>
+          <h2 class="section-title font-display">SYNTHÈSE DE RETRAIT : CAPITAL, PLUS-VALUES & NET EN POCHE</h2>
+        </div>
+        <!-- Indicateur Statut Fiscal -->
+        <div id="tax-status-indicator" class="tax-status-pill font-mono status-mature">
+          <span class="status-badge-tag">[STATUT FISCAL]</span>
+          <span id="tax-status-text">RETRAIT APRÈS 5 ANS : 0% D'IMPÔT SUR LE REVENU</span>
+        </div>
+      </div>
+
+      <!-- Bento Grid des 4 Chiffres Clés -->
+      <div class="bento-results-grid">
+        
+        <!-- CARTE 1: Capital Versé -->
+        <div class="result-card widget">
+          <div class="result-card-header font-mono">
+            <span>[1] CAPITAL VERSÉ</span>
+            <span class="clean-info-tag">[ÉPARGNE PURE]</span>
+          </div>
+          <div class="result-card-body">
+            <div class="result-sub-label font-mono">VOTRE EFFORT D'ÉPARGNE TOTAL</div>
+            <div id="res-total-invested" class="result-big-val font-display">72 000,00 €</div>
+            <div class="result-detail font-mono" id="res-invested-pct">100% de vos apports</div>
+          </div>
+          <div class="result-card-footer font-mono">
+            <span>Capital récupéré intégralement sans impôt</span>
+          </div>
+        </div>
+
+        <!-- CARTE 2: Plus-Value Brute -->
+        <div class="result-card widget">
+          <div class="result-card-header font-mono">
+            <span>[2] PLUS-VALUE BRUTE</span>
+            <span class="clean-info-tag">[INTÉRÊTS COMPOSÉS]</span>
+          </div>
+          <div class="result-card-body">
+            <div class="result-sub-label font-mono">GAINS GÉNÉRÉS PAR LE MARCHÉ</div>
+            <div id="res-gross-gain" class="result-big-val font-display profit">+42 850,20 €</div>
+            <div class="result-detail font-mono profit" id="res-gain-multiplier">+59.5% de performance cumulée</div>
+          </div>
+          <div class="result-card-footer font-mono">
+            <span>Valorisation brute : <strong id="res-gross-total">114 850,20 €</strong></span>
+          </div>
+        </div>
+
+        <!-- CARTE 3: Taxes & Prélèvements Sociaux -->
+        <div class="result-card widget" id="tax-card">
+          <div class="result-card-header font-mono">
+            <span id="tax-card-title">[3] TAXES AU RETRAIT</span>
+            <span class="clean-info-tag" id="tax-tag-mode">[17.2% PS]</span>
+          </div>
+          <div class="result-card-body">
+            <div class="result-sub-label font-mono" id="tax-sub-label">PRÉLÈVEMENTS SOCIAUX (17.2%)</div>
+            <div id="res-taxes-amount" class="result-big-val font-display loss">-7 370,23 €</div>
+            <div class="result-detail font-mono" id="res-tax-explanation">
+              0% d'impôt sur le revenu (Exonération PEA)
+            </div>
+          </div>
+          <div class="result-card-footer font-mono" id="tax-card-footer">
+            <span id="tax-eco-text">Économie vs Compte-Titres : <strong>+5 484,83 €</strong></span>
+          </div>
+        </div>
+
+        <!-- CARTE 4: Montant Net en Poche -->
+        <div class="result-card widget hero-result-card">
+          <div class="result-card-header font-mono">
+            <span>[4] MONTANT NET EN POCHE</span>
+            <span class="badge-virement font-mono">[VIRABLE SUR COMPTE BANCAIRE]</span>
+          </div>
+          <div class="result-card-body">
+            <div class="result-sub-label font-mono">SOMME FINALE APRÈS PRÉLÈVEMENTS</div>
+            <div id="res-net-payout" class="result-big-val font-display highlight-white">107 479,97 €</div>
+            <div class="result-detail font-mono" id="res-net-gain-only">
+              dont <strong>+35 479,97 €</strong> de gains nets
+            </div>
+          </div>
+          <div class="result-card-footer font-mono">
+            <span>Capital garanti + 82.8% de vos plus-values</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Graphique Prédictif Multi-Courbes -->
+      <div class="chart-widget widget">
+        <div class="chart-header-row">
+          <div class="chart-title-group">
+            <span class="widget-tag font-mono">[PROJECTION GRAPHIQUE TEMPORELLE]</span>
+            <h3 class="chart-main-title font-display">ÉVOLUTION ANNUELLE : CAPITAL, BRUT & NET EN POCHE</h3>
+          </div>
+          
+          <div class="chart-legend-custom font-mono">
+            <span class="legend-item"><span class="legend-box box-invested"></span> Capital Versé</span>
+            <span class="legend-item"><span class="legend-box box-gross"></span> Valeur Brute Totale</span>
+            <span class="legend-item"><span class="legend-box box-net"></span> Net en Poche (Après taxes)</span>
+          </div>
+        </div>
+
+        <div class="chart-container-large">
+          <canvas id="predictionChart"></canvas>
+        </div>
+
+        <div class="chart-footer-note font-mono">
+          <span>* Projection calculée sur la base des rendements historiques moyens avec réinvestissement mensuel des dividendes.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 3 : COMPARATEUR DYNAMIQUE INTERACTIF (SÉLECTEUR DÉROULANT)
+         ==================================================================== -->
+    <section id="comparateur-section" class="section-container">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="section-num font-mono">03 // COMPARATIF FACE-À-FACE AVEC VOS VERSEMENTS</span>
+          <h2 class="section-title font-display">COMPAREZ LE PEA À VOS AUTRES SOLUTIONS D'ÉPARGNE</h2>
+        </div>
+        <div class="section-actions">
+          <span class="badge-count font-mono" id="comp-monthly-ref-badge">BASE : 600 €/MOIS PENDANT 10 ANS</span>
+        </div>
+      </div>
+
+      <!-- Carte Principale du Comparateur avec Menu Déroulant -->
+      <div class="comparator-interactive-card widget">
+        
+        <!-- Barre de Contrôle du Choix du Plan -->
+        <div class="comparator-selector-bar">
+          <div class="selector-label-group">
+            <span class="selector-tag font-mono">[CHOISIR LE PLAN À COMPARER AU PEA]</span>
+            <label for="comparator-plan-select" class="selector-label font-display">Comparer votre PEA face à :</label>
+          </div>
+          <div class="custom-select-wrapper">
+            <select id="comparator-plan-select" class="custom-dropdown font-display">
+              <option value="livret_a" selected>Livret A / LDDS (Épargne sécurisée 3.0% net)</option>
+              <option value="assurance_vie">Assurance-Vie Unités de Compte (Gestion multi-supports 4.8% net)</option>
+              <option value="cto">Compte-Titres Ordinaire CTO (Actions avec Flat Tax 30%)</option>
+              <option value="lep">Livret d'Épargne Populaire LEP (Épargne bonifiée 4.0% net)</option>
+              <option value="per">Plan d'Épargne Retraite PER (Épargne bloquée retraite 6.5% net)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Duel Face-à-Face en 2 Colonnes -->
+        <div class="duel-grid">
+          
+          <!-- COLONNE GAUCHE : LE PEA (Votre Configuration de la Partie 1) -->
+          <div class="duel-col duel-pea winner-border">
+            <div class="duel-col-header">
+              <span class="duel-badge font-mono highlight-green">[VOTRE STRATÉGIE PEA - PARTIE 1]</span>
+              <h3 class="duel-title font-display">PEA (PLAN D'ÉPARGNE EN ACTIONS)</h3>
+              <div class="duel-cagr font-display highlight-green" id="duel-cagr-pea">+8.48 %<span class="unit-sub font-sans">/an</span></div>
+            </div>
+
+            <div class="duel-metric-box pea-metric-bg">
+              <div class="metric-lbl font-mono">SOMME TOTALE NETTE EN POCHE :</div>
+              <div class="metric-val font-display highlight-green" id="duel-val-pea">107 479,97 €</div>
+              <div class="metric-gain font-mono" id="duel-gain-pea">dont +35 479,97 € de gains nets</div>
+            </div>
+
+            <div class="duel-details-list font-sans">
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Versements appliqués :</span>
+                <span class="detail-v font-display" id="duel-invested-pea">600 €/mois (72 000 €)</span>
+              </div>
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Plafond légal :</span>
+                <span class="detail-v font-mono">150 000 € de versements (gains illimités)</span>
+              </div>
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Fiscalité des gains :</span>
+                <span class="detail-v font-mono highlight-green">0% d'impôt sur le revenu après 5 ans (17.2% PS seul)</span>
+              </div>
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Frais sur encours :</span>
+                <span class="detail-v font-mono highlight-green">0% par an (Pas de frais de gestion de contrat)</span>
+              </div>
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Disponibilité :</span>
+                <span class="detail-v font-mono">Retraits partiels libres après 5 ans</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLONNE DROITE : LE PLAN SÉLECTIONNÉ (Avec exactement les mêmes versements) -->
+          <div class="duel-col duel-competitor" id="duel-competitor-card">
+            <div class="duel-col-header">
+              <span class="duel-badge font-mono" id="competitor-badge">[PLAN COMPARÉ]</span>
+              <h3 class="duel-title font-display" id="competitor-name">LIVRET A / LDDS</h3>
+              <div class="duel-cagr font-display" id="competitor-cagr">~3.00 %<span class="unit-sub font-sans">/an</span></div>
+            </div>
+
+            <div class="duel-metric-box competitor-metric-bg">
+              <div class="metric-lbl font-mono">SOMME TOTALE NETTE ESTIMÉE :</div>
+              <div class="metric-val font-display" id="competitor-val">84 502,30 €</div>
+              <div class="metric-gain font-mono" id="competitor-gain">dont +12 502,30 € de gains nets</div>
+            </div>
+
+            <div class="duel-details-list font-sans">
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Versements appliqués :</span>
+                <span class="detail-v font-display" id="competitor-invested">600 €/mois (72 000 €)</span>
+              </div>
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Plafond légal :</span>
+                <span class="detail-v font-mono" id="competitor-ceiling">22 950 € (Livret A) + 12 000 € (LDDS)</span>
+              </div>
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Fiscalité des gains :</span>
+                <span class="detail-v font-mono" id="competitor-tax">0% d'impôt et 0% de prélèvements</span>
+              </div>
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Frais sur encours :</span>
+                <span class="detail-v font-mono" id="competitor-fees">0% par an</span>
+              </div>
+              <div class="duel-detail-row">
+                <span class="detail-k font-mono">Limite majeure :</span>
+                <span class="detail-v" id="competitor-limit">Rendement inférieur à l'inflation à long terme. Plafond vite saturé avec votre DCA.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BANNIÈRE DE VERDICT & SURPERFORMANCE CHIFFRÉE -->
+        <div class="comparator-verdict-banner" id="comparator-verdict-box">
+          <div class="verdict-banner-left">
+            <span class="verdict-badge font-mono">[SURPERFORMANCE DU PEA]</span>
+            <div class="verdict-amount font-display highlight-green" id="verdict-diff-amount">+22 977,67 € DE GAINS EN PLUS</div>
+            <div class="verdict-desc font-sans" id="verdict-diff-text">
+              En investissant <strong>600 € par mois pendant 10 ans</strong> sur votre PEA plutôt que sur le Livret A, vous gagnez <strong>22 977,67 € supplémentaires</strong> nets d'impôts sur votre compte bancaire.
+            </div>
+          </div>
+          <div class="verdict-banner-right font-mono">
+            <div class="verdict-pill">
+              <span class="font-display" id="verdict-multiplier">x 2.8</span>
+              <span>PLUS DE PLUS-VALUE</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 4 : GUIDE DIDACTIQUE & FAQ PÉDAGOGIQUE
+         ==================================================================== -->
+    <section id="guide-section" class="section-container">
+      <div class="section-header">
+        <div class="section-title-group">
+          <span class="section-num font-mono">04 // GUIDE PÉDAGOGIQUE</span>
+          <h2 class="section-title font-display">COMPRENDRE LE FONCTIONNEMENT DU PEA</h2>
+        </div>
+      </div>
+
+      <div class="faq-grid">
+        
+        <div class="faq-card widget">
+          <div class="faq-q font-display">1. QU'EST-CE QUE LE PLAN D'ÉPARGNE EN ACTIONS (PEA) ?</div>
+          <p class="faq-a">
+            Le <strong>PEA</strong> est une enveloppe fiscale réglementée par l'État français destinée à encourager l'investissement dans les entreprises. Vous pouvez y verser jusqu'à <strong>150 000 €</strong> de capital. Les gains générés à l'intérieur du compte ne sont soumis à aucune limite de montant.
+          </p>
+        </div>
+
+        <div class="faq-card widget">
+          <div class="faq-q font-display">2. POURQUOI LA RÈGLE DES 5 ANS EST-ELLE CRUCIALE ?</div>
+          <p class="faq-a">
+            La date d'ouverture du PEA (premier versement) fait foi. Dès que le compte atteint son <strong>5ème anniversaire</strong>, vous bénéficiez d'une <strong>exonération totale d'impôt sur le revenu</strong> sur vos plus-values (seuls les 17.2% de prélèvements sociaux sont dus lors d'un retrait vers votre compte bancaire). De plus, les retraits partiels ne clôturent plus le plan.
+          </p>
+        </div>
+
+        <div class="faq-card widget">
+          <div class="faq-q font-display">3. COMMENT FONCTIONNE LA STRATÉGIE DCA (DOLLAR COST AVERAGING) ?</div>
+          <p class="faq-a">
+            Le <strong>DCA</strong> consiste à investir une somme fixe tous les mois (par exemple 400 € chaque 15 du mois), sans se soucier des fluctuations quotidiennes du marché. Vous achetez automatiquement plus d'actions quand les cours baissent et moins quand ils montent, lissant votre Prix de Revient Unitaire (PRU).
+          </p>
+        </div>
+
+        <div class="faq-card widget">
+          <div class="faq-q font-display">4. COMMENT ACHETER LE S&P 500 OU LE MSCI WORLD SUR UN PEA ?</div>
+          <p class="faq-a">
+            Bien que le PEA exige au moins 75% d'actifs européens, les émetteurs majeurs (Amundi, BNP Paribas, iShares) proposent des <strong>ETF synthétiques éligibles au PEA</strong> (ex: CW8, ESE, UST). Ils utilisent des contrats de swap pour répliquer fidèlement la performance des indices américains et mondiaux en toute conformité légale.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         MODAL : CATALOGUE D'ACTIFS DISPONIBLES
+         ==================================================================== -->
+    <div id="catalog-modal" class="modal-overlay hidden">
+      <div class="modal-card widget">
+        <div class="modal-header">
+          <div>
+            <span class="font-mono modal-tag">[CATALOGUE DES ACTIFS PEA]</span>
+            <h3 class="modal-title font-display">CHOISISSEZ UN ACTIF À AJOUTER</h3>
+          </div>
+          <button id="close-modal-btn" class="close-btn" aria-label="Fermer">✕</button>
+        </div>
+
+        <!-- Filtres par catégorie -->
+        <div class="catalog-filter-tabs font-mono">
+          <button class="filter-chip active" data-cat="all">TOUS</button>
+          <button class="filter-chip" data-cat="etf-monde">ETF MONDE / US</button>
+          <button class="filter-chip" data-cat="etf-geo">ETF ÉMERGENTS & EUROPE</button>
+          <button class="filter-chip" data-cat="actions">ACTIONS FRANÇAISES</button>
+        </div>
+
+        <!-- Liste des actifs disponibles -->
+        <div id="catalog-items-list" class="catalog-items-scroll">
+          <!-- Injecté par JavaScript -->
+        </div>
+
+        <!-- Formulaire d'ajout d'actif sur-mesure -->
+        <div class="custom-asset-form">
+          <div class="custom-form-title font-mono">+ AJOUTER UN ACTIF PERSONNALISÉ</div>
+          <div class="custom-inputs-row">
+            <input type="text" id="custom-ticker" placeholder="Ticker (ex: NVDA / TTE.PA)" class="custom-input font-mono" />
+            <input type="text" id="custom-name" placeholder="Nom de l'actif" class="custom-input font-sans" />
+            <input type="number" id="custom-cagr" placeholder="Rendement % / an (ex: 8.5)" step="0.1" class="custom-input font-mono" />
+            <button id="add-custom-asset-btn" class="btn-primary font-mono">AJOUTER</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         FOOTER
+         ==================================================================== -->
+    <footer class="footer font-mono">
+      <div class="footer-left">
+        <span class="glyph-footer-dot"></span>
+        <span>(NOTHING) PEA STUDIO // APPLICATION CLIENT-SIDE & OPEN-SOURCE</span>
+      </div>
+      <div class="footer-right">
+        <span>DESIGN SYSTEM NOTHING OS // TYPOGRAPHIE ULTRA-LISSE</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
