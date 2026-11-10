@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "last_updated": "2026-11-06 22:41:47",
+    "last_updated": "2026-11-10 01:09:33",
     "total_invested": 13555.3,
-    "total_value": 18891.95,
-    "global_gain_loss": 5336.65,
-    "global_performance_pct": 39.37,
+    "total_value": 19078.29,
+    "global_gain_loss": 5522.99,
+    "global_performance_pct": 40.74,
     "currency": "EUR",
     "status": "ONLINE"
   },
@@ -13,25 +13,25 @@
       "name": "Amundi MSCI World (CW8)",
       "shares": 22.0,
       "pru": 512.26,
-      "current_price": 692.3,
+      "current_price": 698.37,
       "invested_value": 11269.8,
-      "current_value": 15230.6,
-      "gain_loss": 3960.8,
-      "performance_pct": 35.15,
+      "current_value": 15364.14,
+      "gain_loss": 4094.34,
+      "performance_pct": 36.33,
       "target_allocation_pct": 80.0,
-      "current_allocation_pct": 80.62
+      "current_allocation_pct": 80.53
     },
     "PAEEM.PA": {
       "name": "Amundi PEA Emerging Markets (PAEEM)",
       "shares": 110.0,
       "pru": 20.78,
-      "current_price": 33.28,
+      "current_price": 33.77,
       "invested_value": 2285.5,
-      "current_value": 3661.35,
-      "gain_loss": 1375.85,
-      "performance_pct": 60.2,
+      "current_value": 3714.15,
+      "gain_loss": 1428.65,
+      "performance_pct": 62.51,
       "target_allocation_pct": 20.0,
-      "current_allocation_pct": 19.38
+      "current_allocation_pct": 19.47
     }
   },
   "history": [
@@ -426,6 +426,13 @@
       "total_invested": 13555.3,
       "gain_loss": 5336.65,
       "performance_pct": 39.37
+    },
+    {
+      "date": "2026-11-10",
+      "total_value": 19078.29,
+      "total_invested": 13555.3,
+      "gain_loss": 5522.99,
+      "performance_pct": 40.74
     }
   ]
 }
